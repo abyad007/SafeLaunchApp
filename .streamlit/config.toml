@@ -1,0 +1,15 @@
+# Versigent Safe Launch — native Streamlit theme
+# Mirrors design/tokens.json. Affects native widgets (buttons, inputs, sidebar,
+# tabs, sliders). Component CSS lives in core/theme.py.
+[theme]
+primaryColor = "#CD7925"            # brand copper — widget accents
+backgroundColor = "#FFFFFF"         # main canvas
+secondaryBackgroundColor = "#F4F1EA" # warm stone — sidebar / cards / inputs
+textColor = "#16283F"               # navy ink
+font = "sans serif"                 # Barlow loaded via core/theme.py CSS
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
