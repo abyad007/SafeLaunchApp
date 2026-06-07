@@ -5,3 +5,13 @@ output/
 data/plans/
 *.zip
 .streamlit/secrets.toml
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/out/
+
+# Backend
+backend/__pycache__/
+backend/*.pyc
