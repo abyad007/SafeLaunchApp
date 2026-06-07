@@ -18,6 +18,14 @@ const barlowCondensed = Barlow_Condensed({
 export const metadata: Metadata = {
   title: "Versigent — Safe Launch Generator",
   description: "Industrial quality management dashboard for safe launch planning",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
