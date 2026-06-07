@@ -386,9 +386,42 @@ def _stepper_css():
 
 
 def _tabbar_css():
-    """Fixed iOS-style bottom tab bar built from real Streamlit buttons.
-    The bar = the horizontal block that contains our .vg-tabmark sentinel
-    (selected via :has), so clicks rerun over the websocket and keep state."""
+    """Fixed iOS-style bottom tab bar — Lucide SVG icons via CSS mask-image."""
+    def _svg(path_data):
+        return (
+            "url(\"data:image/svg+xml,"
+            "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24'"
+            " viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2'"
+            f" stroke-linecap='round' stroke-linejoin='round'>{path_data}</svg>\")"
+        )
+
+    _icons = [
+        # Config — sliders
+        _svg("<line x1='4' y1='21' x2='4' y2='14'/><line x1='4' y1='10' x2='4' y2='3'/>"
+             "<line x1='12' y1='21' x2='12' y2='12'/><line x1='12' y1='8' x2='12' y2='3'/>"
+             "<line x1='20' y1='21' x2='20' y2='16'/><line x1='20' y1='12' x2='20' y2='3'/>"
+             "<line x1='1' y1='14' x2='7' y2='14'/><line x1='9' y1='8' x2='15' y2='8'/>"
+             "<line x1='17' y1='16' x2='23' y2='16'/>"),
+        # Tableau — bar chart
+        _svg("<line x1='18' y1='20' x2='18' y2='10'/><line x1='12' y1='20' x2='12' y2='4'/>"
+             "<line x1='6' y1='20' x2='6' y2='14'/><line x1='2' y1='20' x2='22' y2='20'/>"),
+        # Revue — clipboard check
+        _svg("<path d='M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7"
+             "a2 2 0 0 0-2-2h-2'/><rect x='9' y='3' width='6' height='4' rx='2'/>"
+             "<path d='m9 12 2 2 4-4'/>"),
+        # Export — upload arrow
+        _svg("<path d='M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8'/>"
+             "<polyline points='16 6 12 2 8 6'/><line x1='12' y1='2' x2='12' y2='15'/>"),
+    ]
+
+    icon_rules = "".join(
+        '\n  div[data-testid="stHorizontalBlock"]:has(.vg-tabmark)'
+        f' [data-testid="column"]:nth-child({i})'
+        ' .stButton > button::before'
+        ' { -webkit-mask-image: ' + url + '; mask-image: ' + url + '; }'
+        for i, url in enumerate(_icons, 1)
+    )
+
     return """
   .block-container { padding-bottom: 108px !important; }
   .vg-tabmark { display: none; }
@@ -406,16 +439,25 @@ def _tabbar_css():
   }
   div[data-testid="stHorizontalBlock"]:has(.vg-tabmark) .stButton > button {
     width: 100%; background: transparent; border: none; box-shadow: none;
-    color: var(--vg-muted); font-size: 11px; font-weight: 600; line-height: 1.35;
-    white-space: pre-line; padding: 4px 2px; min-height: 0; border-radius: 10px;
+    color: var(--vg-muted); font-size: 10px; font-weight: 600; line-height: 1.2;
+    padding: 5px 2px 6px; min-height: 0; border-radius: 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
     transition: color .15s ease, background .15s ease;
+  }
+  div[data-testid="stHorizontalBlock"]:has(.vg-tabmark) .stButton > button::before {
+    content: ''; display: block;
+    width: 22px; height: 22px; flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask-size: contain; mask-size: contain;
+    -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    -webkit-mask-position: center; mask-position: center;
   }
   div[data-testid="stHorizontalBlock"]:has(.vg-tabmark) .stButton > button:hover {
     color: var(--vg-fg); background: var(--vg-surface-alt); border: none;
   }
   div[data-testid="stHorizontalBlock"]:has(.vg-tabmark) .stButton > button:disabled {
     opacity: .35; background: transparent;
-  }"""
+  }""" + icon_rules
 
 
 def _dark_css():

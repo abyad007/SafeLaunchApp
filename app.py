@@ -148,7 +148,7 @@ def _section(title, sub=""):
 
 # iOS bottom tab bar — real Streamlit buttons (state-preserving), pinned via CSS.
 # Emoji icon on line 1, label on line 2 (white-space:pre-line in _tabbar_css).
-_TABS = [(1, "⚙️\nConfig"), (2, "📊\nTableau"), (3, "✅\nRevue"), (4, "📤\nExport")]
+_TABS = [(1, "Config"), (2, "Tableau"), (3, "Revue"), (4, "Export")]
 
 
 def render_tabbar(step, has_result):
