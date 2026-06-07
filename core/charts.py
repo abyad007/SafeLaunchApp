@@ -38,13 +38,14 @@ def _risk_color(risk, dark):
 
 
 # ── 1. Risk gauge ────────────────────────────────────────────────────────────
-def risk_gauge(score, risk, dark=False):
+def risk_gauge(score, risk, dark=False, height=230):
     c = _risk_color(risk, dark)
+    num_size = 32 if height < 220 else 38
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
         value=score,
         number={"suffix": " /100",
-                "font": {"size": 38, "color": c, "family": _DISPLAY}},
+                "font": {"size": num_size, "color": c, "family": _DISPLAY}},
         gauge={
             "axis": {"range": [0, 100], "tickwidth": 1,
                      "tickcolor": color("muted-foreground", dark)},
@@ -60,7 +61,7 @@ def risk_gauge(score, risk, dark=False):
                           "thickness": 0.85, "value": score},
         },
     ))
-    return _base(fig, dark, 230, top=10)
+    return _base(fig, dark, height, top=10)
 
 
 # ── 2. Risk factor breakdown (horizontal bars, sorted) ───────────────────────

@@ -718,93 +718,108 @@ def render_dashboard():
     cust_name = st.session_state["customer_name"]
     inputs = st.session_state.get("inputs", {})
 
-    _section(f"Étape 2 · Tableau de bord — {st.session_state['part_name']}",
+    _section(f"Tableau de bord — {st.session_state['part_name']}",
              f"{PROGRAM_OPTIONS.get(prog_type, prog_type)} · {cust_name}")
 
-    # Hero: gauge + recommendation
-    h1, h2 = st.columns([1, 1.4])
-    with h1:
+    kpis = _build_kpis(prog_type, result, meta, cust_name)
+
+    # ── Ligne 1 : Jauge | Recommandation ────────────────────────────────────
+    c_gauge, c_reco = st.columns([1, 2])
+    with c_gauge:
         with st.container(border=True):
-            st.plotly_chart(charts.risk_gauge(result.score, result.risk, DARK),
-                            use_container_width=True, theme=None,
-                            config={"displayModeBar": False})
+            st.plotly_chart(
+                charts.risk_gauge(result.score, result.risk, DARK, height=200),
+                use_container_width=True, theme=None, config={"displayModeBar": False})
             st.markdown(
-                f'<div style="text-align:center;margin-top:-8px;">'
+                f'<div style="text-align:center;margin-top:-14px;padding-bottom:6px;">'
                 f'<span class="risk-badge" style="background:{RISK_COLORS[result.risk]}22;'
                 f'color:{RISK_TEXT[result.risk]};">{result.risk} RISK</span></div>',
                 unsafe_allow_html=True)
-    with h2:
-        with st.container(border=True):
-            st.markdown(
-                '<div style="font-size:11px;letter-spacing:2px;color:var(--vg-accent-text);'
-                'text-transform:uppercase;font-weight:700;margin-bottom:8px;">Recommandation</div>'
-                f'<p style="color:var(--vg-fg);font-size:15px;line-height:1.6;margin:0 0 10px;">{result.recommendation}</p>',
-                unsafe_allow_html=True)
-            if getattr(result, "pra_forecast", ""):
-                pc = {"GREEN": RISK_COLORS["LOW"], "YELLOW": RISK_COLORS["MEDIUM"], "RED": RISK_COLORS["HIGH"]}.get(result.pra_forecast, "#64748B")
-                pt = {"GREEN": RISK_TEXT["LOW"], "YELLOW": RISK_TEXT["MEDIUM"], "RED": RISK_TEXT["HIGH"]}.get(result.pra_forecast, "#64748B")
-                st.markdown(
-                    f'<div style="padding:10px 12px;background:{pc}22;border-left:4px solid {pc};border-radius:6px;">'
-                    f'<span style="font-size:10px;letter-spacing:1.5px;color:{pt};text-transform:uppercase;font-weight:700;">PRA Forecast</span> '
-                    f'<span style="font-weight:700;color:{pt};">{result.pra_forecast}</span>'
-                    f'<span style="color:var(--vg-muted);font-size:12px;"> · conformance ≈ {result.conformance}%</span></div>',
-                    unsafe_allow_html=True)
+    with c_reco:
+        pra_html = ""
+        if getattr(result, "pra_forecast", ""):
+            pc = {"GREEN": RISK_COLORS["LOW"], "YELLOW": RISK_COLORS["MEDIUM"],
+                  "RED": RISK_COLORS["HIGH"]}.get(result.pra_forecast, "#64748B")
+            pt = {"GREEN": RISK_TEXT["LOW"], "YELLOW": RISK_TEXT["MEDIUM"],
+                  "RED": RISK_TEXT["HIGH"]}.get(result.pra_forecast, "#64748B")
+            pra_html = (
+                f'<div style="margin-top:12px;padding:8px 12px;background:{pc}22;'
+                f'border-left:4px solid {pc};border-radius:6px;">'
+                f'<span style="font-size:9px;letter-spacing:1.5px;color:{pt};'
+                f'text-transform:uppercase;font-weight:700;">PRA Forecast</span> '
+                f'<span style="font-weight:700;color:{pt};">{result.pra_forecast}</span>'
+                f'<span style="color:var(--vg-muted);font-size:11px;"> · conformance ≈ {result.conformance}%</span></div>'
+            )
+        # Custom div: même style que st.container(border=True) + flex centrage vertical
+        # min-height aligne sur la hauteur de la carte jauge (gauge 200px + badge + paddings ≈ 270px)
+        st.markdown(
+            '<div style="border:1px solid var(--vg-border);border-radius:16px;'
+            'padding:20px 24px;background:var(--vg-surface);'
+            'box-shadow:var(--vg-shadow-card);box-sizing:border-box;'
+            'min-height:270px;display:flex;flex-direction:column;justify-content:center;">'
+            '<div style="font-size:10px;letter-spacing:2px;color:var(--vg-accent-text);'
+            'text-transform:uppercase;font-weight:700;margin-bottom:10px;">Recommandation</div>'
+            f'<p style="color:var(--vg-fg);font-size:14px;line-height:1.65;margin:0;">'
+            f'{result.recommendation}</p>'
+            + pra_html + '</div>',
+            unsafe_allow_html=True)
 
-    # KPI cards
-    st.markdown("<br>", unsafe_allow_html=True)
-    kpis = _build_kpis(prog_type, result, meta, cust_name)
-    kpi_cols = st.columns(3)
+    # ── Ligne 2 : KPI strip (6 colonnes) ────────────────────────────────────
+    kpi_cols = st.columns(len(kpis[:6]))
     for i, kpi in enumerate(kpis[:6]):
-        with kpi_cols[i % 3]:
+        with kpi_cols[i]:
             st.markdown(
-                f'<div class="metric-card"><div class="metric-label">{kpi["label"]}</div>'
+                f'<div class="metric-card-kpi">'
+                f'<div class="metric-label">{kpi["label"]}</div>'
                 f'<div class="metric-value">{kpi["value"]}</div>'
-                f'<div class="metric-sub">{kpi["sub"]}</div></div>', unsafe_allow_html=True)
+                f'<div class="metric-sub">{kpi["sub"]}</div></div>',
+                unsafe_allow_html=True)
 
-    # Factor bars
-    st.markdown("<br>", unsafe_allow_html=True)
-    _section("Facteurs de risque", "Contribution de chaque facteur au score global.")
-    with st.container(border=True):
-        if result.factors:
-            st.plotly_chart(charts.factor_bar(result.factors, DARK),
-                            use_container_width=True, theme=None, config={"displayModeBar": False})
-        else:
-            st.caption("Aucun facteur détaillé pour ce type de programme.")
+    # ── Ligne 3 : Facteurs de risque | Donut checklist ───────────────────────
+    c_factors, c_donut = st.columns([3, 2])
+    with c_factors:
+        with st.container(border=True):
+            st.markdown('<div class="section-label">Facteurs de risque</div>',
+                        unsafe_allow_html=True)
+            if result.factors:
+                st.plotly_chart(charts.factor_bar(result.factors, DARK),
+                                use_container_width=True, theme=None,
+                                config={"displayModeBar": False})
+            else:
+                st.caption("Aucun facteur détaillé pour ce type de programme.")
+    with c_donut:
+        done, crit, todo = _readiness_counts(checklist)
+        with st.container(border=True):
+            st.markdown('<div class="section-label">Composition checklist</div>',
+                        unsafe_allow_html=True)
+            st.plotly_chart(
+                charts.completion_donut(done, crit, todo, DARK,
+                                        labels=("Déjà prêt", "Critique", "À traiter")),
+                use_container_width=True, theme=None, config={"displayModeBar": False})
 
-    # Readiness composition + per-phase
-    done, crit, todo = _readiness_counts(checklist)
+    # ── Ligne 4 : Timeline + Quality gates ───────────────────────────────────
     phases = get_phases(checklist) or ["All Items"]
-    rows = [(ph, sum(1 for i in checklist if i.phase == ph and i.done),
-             sum(1 for i in checklist if i.phase == ph)) for ph in phases]
-    g1, g2 = st.columns([1, 1.3])
-    with g1:
-        _section("Composition de la checklist")
-        with st.container(border=True):
-            st.plotly_chart(charts.completion_donut(done, crit, todo, DARK,
-                            labels=("Déjà prêt", "Critique", "À traiter")),
-                            use_container_width=True, theme=None, config={"displayModeBar": False})
-    with g2:
-        _section("Items par phase qualité")
-        with st.container(border=True):
-            st.plotly_chart(charts.phase_bars(rows, DARK),
-                            use_container_width=True, theme=None, config={"displayModeBar": False})
-
-    # Timeline
     start = _parse_date(meta.get("primary_date"))
-    end = _parse_date(meta.get("sl_end_date"))
+    end   = _parse_date(meta.get("sl_end_date"))
     fig_tl = charts.timeline(start, end, phases, DARK)
     if fig_tl is not None:
-        _section("Fenêtre Safe Launch", f"De {start:%d %b %Y} à {end:%d %b %Y} ({result.duration} jours).")
         with st.container(border=True):
-            st.plotly_chart(fig_tl, use_container_width=True, theme=None, config={"displayModeBar": False})
+            st.markdown(
+                f'<div class="section-label">Fenêtre Safe Launch · '
+                f'{start:%d %b %Y} → {end:%d %b %Y} ({result.duration} j)</div>',
+                unsafe_allow_html=True)
+            st.plotly_chart(fig_tl, use_container_width=True, theme=None,
+                            config={"displayModeBar": False})
 
-    # Customer gates
-    cust = get_customer(inputs.get("customer", "other"))
+    cust  = get_customer(inputs.get("customer", "other"))
     gates = cust.get("gates", [])
     if gates:
-        _section("Quality Gates client", cust.get("name", ""))
-        st.markdown('<div>' + "".join(
-            f'<span class="vg-gate"><span class="dot"></span>{g}</span>' for g in gates) + '</div>',
+        st.markdown(
+            '<div class="section-label" style="margin-top:8px;">Quality Gates · '
+            + cust.get("name", "") + '</div>'
+            + '<div>' + "".join(
+                f'<span class="vg-gate"><span class="dot"></span>{g}</span>'
+                for g in gates) + '</div>',
             unsafe_allow_html=True)
 
     _nav(prev_to=1, next_to=3, next_label="Revue du plan  →")

@@ -177,6 +177,21 @@ def _component_css():
   }
   .metric-sub { font-size: 11px; color: var(--vg-muted); margin-top: 4px; }
 
+  /* Compact KPI strip — used in the dashboard's horizontal KPI row */
+  .metric-card-kpi {
+    background: var(--vg-surface);
+    border: 1px solid var(--vg-border);
+    border-radius: 12px; padding: 10px 12px;
+    box-shadow: var(--vg-shadow-card);
+  }
+  .metric-card-kpi .metric-label { font-size: 9px; margin-bottom: 3px; }
+  .metric-card-kpi .metric-value {
+    font-family: var(--vg-font-display); font-size: 18px; font-weight: 700;
+    color: var(--vg-fg); line-height: 1.1;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .metric-card-kpi .metric-sub { font-size: 10px; margin-top: 2px; }
+
   .chk-done { background: var(--vg-risk-low-bg); border-left: 3px solid var(--vg-risk-low);
               padding: 6px 10px; border-radius: var(--vg-radius-sm); font-size: 12px;
               color: var(--vg-risk-low-text); margin: 3px 0; }
