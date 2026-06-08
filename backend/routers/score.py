@@ -3,7 +3,7 @@ from dataclasses import asdict
 from sys import path as syspath
 from pathlib import Path
 
-syspath.insert(0, str(Path(__file__).parent.parent.parent / "SafeLaunchApp"))
+syspath.insert(0, str(Path(__file__).parent.parent.parent))
 
 from core.scoring_engine import calculate_score
 from models import ScoreRequest, ScoreResultOut, ScoreFactorOut
