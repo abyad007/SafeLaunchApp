@@ -17,7 +17,7 @@ const barlowCondensed = Barlow_Condensed({
 
 export const metadata: Metadata = {
   title: "Versigent — Safe Launch Generator",
-  description: "Industrial quality management dashboard for safe launch planning",
+  description: "Versigent Safe Launch Generator — Pilotez vos lancements série avec précision. Évaluation des risques, plan d'actions qualité et reporting PPAP en quelques minutes.",
   icons: {
     icon: [
       { url: "/favicon.ico" },
