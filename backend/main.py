@@ -1,8 +1,10 @@
 import sys
 from pathlib import Path
 
-# Make the existing Python logic importable
-sys.path.insert(0, str(Path(__file__).parent.parent))
+_backend = Path(__file__).parent
+_root = _backend.parent
+sys.path.insert(0, str(_root))    # core/ lives here
+sys.path.insert(0, str(_backend)) # routers/ lives here
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
